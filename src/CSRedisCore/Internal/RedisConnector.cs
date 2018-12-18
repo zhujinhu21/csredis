@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace CSRedis.Internal
 {
@@ -20,6 +21,7 @@ namespace CSRedis.Internal
         internal readonly IRedisSocket _redisSocket;
         readonly EndPoint _endPoint;
         readonly RedisIO _io;
+        private ILogger _logger;
 
         public event EventHandler Connected;
 
@@ -46,7 +48,7 @@ namespace CSRedis.Internal
         }
         
 
-        public RedisConnector(EndPoint endPoint, IRedisSocket socket, int concurrency, int bufferSize)
+        public RedisConnector(EndPoint endPoint, IRedisSocket socket, int concurrency, int bufferSize, ILogger logger = null)
         {
             _concurrency = concurrency;
             _bufferSize = bufferSize;
@@ -54,6 +56,7 @@ namespace CSRedis.Internal
             _redisSocket = socket;
             _io = new RedisIO();
             _asyncConnector = new Lazy<AsyncConnector>(AsyncConnectorFactory);
+            _logger = logger;
         }
 
         public bool Connect(int timeout)

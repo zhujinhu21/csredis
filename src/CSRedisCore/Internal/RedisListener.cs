@@ -5,19 +5,22 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace CSRedis.Internal
 {
     abstract class RedisListner<TResponse>
     {
         readonly RedisConnector _connection;
+        protected ILogger _logger;
 
         public bool Listening { get; private set; }
         protected RedisConnector Connection { get { return _connection; } }
 
-        public RedisListner(RedisConnector connection)
+        public RedisListner(RedisConnector connection, ILogger logger = null)
         {
             _connection = connection;
+            _logger = logger;
         }
 
         protected void Listen(Func<RedisReader, TResponse> func)

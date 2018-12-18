@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace CSRedis.Internal
 {
@@ -9,8 +10,8 @@ namespace CSRedis.Internal
     {
         public event EventHandler<RedisMonitorEventArgs> MonitorReceived;
 
-        public MonitorListener(RedisConnector connection)
-            : base(connection)
+        public MonitorListener(RedisConnector connection, ILogger logger = null)
+            : base(connection, logger)
         { }
 
         public string Start()
@@ -23,6 +24,7 @@ namespace CSRedis.Internal
         protected override void OnParsed(object value)
         {
             OnMonitorReceived(value);
+            if (_logger != null) _logger.LogTrace("Message received.", new object[] { value });
         }
 
         protected override bool Continue()

@@ -8,6 +8,7 @@ using System.IO;
 using CSRedis.Internal.IO;
 using System.Net;
 using System.Net.Sockets;
+using Microsoft.Extensions.Logging;
 
 namespace CSRedis
 {
@@ -118,8 +119,8 @@ namespace CSRedis
         /// Create a new RedisClient using default port and encoding
         /// </summary>
         /// <param name="host">Redis server hostname</param>
-        public RedisClient(string host)
-            : this(host, DefaultPort)
+        public RedisClient(string host, ILogger logger = null)
+            : this(host, DefaultPort, logger)
         { }
 
         /// <summary>
@@ -127,8 +128,8 @@ namespace CSRedis
         /// </summary>
         /// <param name="host">Redis server hostname</param>
         /// <param name="port">Redis server port</param>
-        public RedisClient(string host, int port)
-            : this(host, port, DefaultSSL)
+        public RedisClient(string host, int port, ILogger logger = null)
+            : this(host, port, DefaultSSL, logger)
         { }
 
         /// <summary>
@@ -137,16 +138,16 @@ namespace CSRedis
         /// <param name="host">Redis server hostname</param>
         /// <param name="port">Redis server port</param>
         /// <param name="ssl">Set to true if remote Redis server expects SSL</param>
-        public RedisClient(string host, int port, bool ssl)
-            : this(host, port, ssl, DefaultConcurrency, DefaultBufferSize)
+        public RedisClient(string host, int port, bool ssl, ILogger logger = null)
+            : this(host, port, ssl, DefaultConcurrency, DefaultBufferSize, logger)
         { }
 
         /// <summary>
         /// Create a new RedisClient
         /// </summary>
         /// <param name="endpoint">Redis server</param>
-        public RedisClient(EndPoint endpoint)
-            : this(endpoint, DefaultSSL)
+        public RedisClient(EndPoint endpoint, ILogger logger = null)
+            : this(endpoint, DefaultSSL, logger)
         { }
 
         /// <summary>
@@ -154,8 +155,8 @@ namespace CSRedis
         /// </summary>
         /// <param name="endpoint">Redis server</param>
         /// <param name="ssl">Set to true if remote Redis server expects SSL</param>
-        public RedisClient(EndPoint endpoint, bool ssl)
-            : this(endpoint, ssl, DefaultConcurrency, DefaultBufferSize)
+        public RedisClient(EndPoint endpoint, bool ssl, ILogger logger = null)
+            : this(endpoint, ssl, DefaultConcurrency, DefaultBufferSize, logger)
         { }
 
         /// <summary>
@@ -165,8 +166,8 @@ namespace CSRedis
         /// <param name="port">Redis server port</param>
         /// <param name="asyncConcurrency">Max concurrent threads (default 1000)</param>
         /// <param name="asyncBufferSize">Async thread buffer size (default 10240 bytes)</param>
-        public RedisClient(string host, int port, int asyncConcurrency, int asyncBufferSize)
-            : this(host, port, DefaultSSL, asyncConcurrency, asyncBufferSize)
+        public RedisClient(string host, int port, int asyncConcurrency, int asyncBufferSize, ILogger logger = null)
+            : this(host, port, DefaultSSL, asyncConcurrency, asyncBufferSize, logger)
         { }
 
         /// <summary>
@@ -177,8 +178,8 @@ namespace CSRedis
         /// <param name="ssl">Set to true if remote Redis server expects SSL</param>
         /// <param name="asyncConcurrency">Max concurrent threads (default 1000)</param>
         /// <param name="asyncBufferSize">Async thread buffer size (default 10240 bytes)</param>
-        public RedisClient(string host, int port, bool ssl, int asyncConcurrency, int asyncBufferSize)
-            : this(new DnsEndPoint(host, port), ssl, asyncConcurrency, asyncBufferSize)
+        public RedisClient(string host, int port, bool ssl, int asyncConcurrency, int asyncBufferSize, ILogger logger = null)
+            : this(new DnsEndPoint(host, port), ssl, asyncConcurrency, asyncBufferSize, logger)
         { }
 
         /// <summary>
@@ -187,8 +188,8 @@ namespace CSRedis
         /// <param name="endpoint">Redis server</param>
         /// <param name="asyncConcurrency">Max concurrent threads (default 1000)</param>
         /// <param name="asyncBufferSize">Async thread buffer size (default 10240 bytes)</param>
-        public RedisClient(EndPoint endpoint, int asyncConcurrency, int asyncBufferSize)
-            : this (endpoint, DefaultSSL, asyncConcurrency, asyncBufferSize)
+        public RedisClient(EndPoint endpoint, int asyncConcurrency, int asyncBufferSize, ILogger logger = null)
+            : this (endpoint, DefaultSSL, asyncConcurrency, asyncBufferSize, logger)
         { }
 
         /// <summary>
@@ -198,15 +199,15 @@ namespace CSRedis
         /// <param name="ssl">Set to true if remote Redis server expects SSL</param>
         /// <param name="asyncConcurrency">Max concurrent threads (default 1000)</param>
         /// <param name="asyncBufferSize">Async thread buffer size (default 10240 bytes)</param>
-        public RedisClient(EndPoint endpoint, bool ssl, int asyncConcurrency, int asyncBufferSize)
+        public RedisClient(EndPoint endpoint, bool ssl, int asyncConcurrency, int asyncBufferSize, ILogger logger = null)
             : this(new RedisSocket(ssl), endpoint, asyncConcurrency, asyncBufferSize)
         { }
 
-        internal RedisClient(IRedisSocket socket, EndPoint endpoint)
-            : this(socket, endpoint, DefaultConcurrency, DefaultBufferSize)
+        internal RedisClient(IRedisSocket socket, EndPoint endpoint, ILogger logger = null)
+            : this(socket, endpoint, DefaultConcurrency, DefaultBufferSize, logger)
         { }
 
-        internal RedisClient(IRedisSocket socket, EndPoint endpoint, int asyncConcurrency, int asyncBufferSize)
+        internal RedisClient(IRedisSocket socket, EndPoint endpoint, int asyncConcurrency, int asyncBufferSize, ILogger logger = null)
         {
 			// use invariant culture - we have to set it explicitly for every thread we create to 
 			// prevent any floating-point problems (mostly because of number formats in non en-US cultures).

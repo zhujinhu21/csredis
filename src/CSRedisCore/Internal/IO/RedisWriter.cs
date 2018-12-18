@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace CSRedis.Internal.IO
 {
@@ -24,7 +25,11 @@ namespace CSRedis.Internal.IO
         {
             byte[] data = Prepare(command);
             stream.Write(data, 0, data.Length);
-			//Console.WriteLine($"WriteSync: {Encoding.UTF8.GetString(data)}");
+            //Console.WriteLine($"WriteSync: {Encoding.UTF8.GetString(data)}");
+            if (_io.Logger != null)
+            {
+                _io.Logger.LogTrace("Message sent", new object[] { _io.Encoding.GetString(data) });
+            }
 			return data.Length;
         }
 
@@ -36,9 +41,14 @@ namespace CSRedis.Internal.IO
 			var bufferLen = buffer.Length;
 			if (dataLen > bufferLen - offset) throw new Exception($"发送数据长度 {dataLen} 大于 异步写入缓冲块大小 {bufferLen - offset}，请设置连接串参数：writeBuffer");
 			for (int a = offset; a < bufferLen && b < data.Length; a++, b++) buffer[a] = data[b];
-			//Console.WriteLine($"WriteAsync: {Encoding.UTF8.GetString(data)}");
-			return b;
+            //Console.WriteLine($"WriteAsync: {Encoding.UTF8.GetString(data)}");
+            if (_io.Logger != null)
+            {
+                _io.Logger.LogTrace("Message sent", new object[] { _io.Encoding.GetString(data) });
+            }
+            return b;
         }
+
 
         public byte[] Prepare(RedisCommand command)
         {
